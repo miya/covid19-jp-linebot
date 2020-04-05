@@ -1,0 +1,6 @@
+flask
+requests
+gunicorn
+line-bot-sdk
+firebase-admin
+google-cloud-firestore

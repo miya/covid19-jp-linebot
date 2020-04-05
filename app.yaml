@@ -1,0 +1,12 @@
+runtime: python37
+env: standard
+entrypoint: gunicorn -b :$PORT main:app
+
+automatic_scaling:
+  min_idle_instances: automatic
+  max_idle_instances: 1
+  min_pending_latency: 3000ms
+  max_pending_latency: automatic
+
+includes:
+- secret.yaml

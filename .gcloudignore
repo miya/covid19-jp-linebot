@@ -1,0 +1,5 @@
+.idea
+.gcloudignore
+.git
+.DS_Store
+test.py
