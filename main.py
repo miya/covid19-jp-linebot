@@ -205,7 +205,7 @@ def handle_message(event):
         入力された値が間違っています。
         
         \"ヘルプ\"
-        LINE BOTの詳細情報
+        > LINE BOTの詳細情報
         
         \"感染者数\"
         > 日本国内の感染者総数
