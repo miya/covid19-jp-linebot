@@ -28,19 +28,32 @@ line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 # API
-base_url = "https://miya.github.io/covid19-jp-api/prefectures.json"
+base_url = {
+    "main_url": "https://miya.github.io/covid19-jp-api/prefectures.json",
+    "sub_url": "https://raw.githubusercontent.com/miya/covid19-jp-api/gh-pages/prefectures.json"
+}
 
+# jsonレスポンスが格納される
+data_dic = {}
+
+
+def get_data_dic():
+    global data_dic
+    for url in base_url:
+        r = requests.get(base_url[url])
+        s = r.status_code
+        if s == 200:
+            data_dic = r.json()
+            break
 
 def get_total_cases():
-    data_dic = requests.get(base_url).json()
     return sum([data_dic["prefectures_data"][i]["cases"] for i in data_dic["prefectures_data"]])
 
 def get_total_deaths():
-    data_dic = requests.get(base_url).json()
     return sum([data_dic["prefectures_data"][i]["deaths"] for i in data_dic["prefectures_data"]])
 
 def get_pref_data(pref_name):
-    return requests.get(base_url).json()["prefectures_data"][pref_name]
+    return data_dic["prefectures_data"][pref_name]
 
 @app.route("/callback", methods=["POST"])
 def callback():
@@ -55,9 +68,17 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+
+    # 入力された文字列を格納
     input_msg = event.message.text
 
-    if input_msg == "ヘルプ":
+    # グローバル変数"data_dic"にデータを格納
+    get_data_dic()
+
+    if not data_dic:
+        output_msg = "技術的な問題が発生しています。"
+
+    elif input_msg == "ヘルプ":
         output_msg = textwrap.dedent("""
         コロナウイルスによる日本国内の感染者数、死亡者数を調べることができます。データは２時間ごとに更新されます。
         
