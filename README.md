@@ -17,7 +17,7 @@
 ```
 
 ## Specification
-Flaskとline-bot-sdkを使いGoogleAppEngineでホスティングしました。データは[covid19-japan-web-api](https://github.com/ryo-ma/covid19-japan-web-api)のAPIを30分ごとにGithubActionsで叩き[covid19-jp-api](https://github.com/miya/covid19-jp-api)のGitHubPagesで擬似的なAPIを作ったものになります。linebotにコマンドが入力された際にこの擬似APIを叩くことで、データ元のサーバーに負担がかからないようにしました。
+Flaskとline-bot-sdkを使いGoogleAppEngineでホスティングしました。データは[ryo-ma/covid19-japan-web-api](https://github.com/ryo-ma/covid19-japan-web-api)のAPIを30分ごとにGithubActionsで叩き[miya/covid19-jp-api](https://github.com/miya/covid19-jp-api)のGitHubPagesで擬似的なAPIを作ったものになります。linebotにコマンドが入力された際にこの擬似APIを叩くことで、データ元のサーバーに負担がかからないようにしました。
 
 ## QR
 <img src="https://user-images.githubusercontent.com/34241526/78689018-d8264800-7930-11ea-929f-53c604ade7c0.png" width="200">
