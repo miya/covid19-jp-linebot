@@ -6,6 +6,7 @@ from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
 from linebot.models import (MessageEvent, TextMessage, TextSendMessage)
 
+# 都道府県リスト
 pref_list = [
     "北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県",
     "福島県", "茨城県", "栃木県", "群馬県", "埼玉県", "千葉県",
