@@ -41,10 +41,6 @@ def get_total_deaths():
 def get_pref_data(pref_name):
     return requests.get(base_url).json()["prefectures_data"][pref_name]
 
-@app.route("/", methods=["GET"])
-def route():
-    return "ok"
-
 @app.route("/callback", methods=["POST"])
 def callback():
     signature = request.headers["X-Line-Signature"]
