@@ -2,6 +2,7 @@ import os
 import textwrap
 import requests
 from flask import Flask, request, abort
+from datetime import datetime, timedelta, timezone
 from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
 from linebot.models import (MessageEvent, TextMessage, TextSendMessage)
@@ -46,6 +47,14 @@ def get_data_dic():
             data_dic = r.json()
             break
 
+def cal_time():
+    jst = timezone(timedelta(hours=+9), "JST")
+    uptmp = datetime.strptime(data_dic["update"], "%Y-%m-%d %H:%M")
+    update_time = datetime(uptmp.year, uptmp.month, uptmp.day, uptmp.hour, uptmp.minute)
+    nowtmp = datetime.now(jst)
+    now_time = datetime(nowtmp.year, nowtmp.month, nowtmp.day, nowtmp.hour, nowtmp.minute)
+    return (now_time - update_time).seconds
+
 def get_total_cases():
     return sum([data_dic["prefectures_data"][i]["cases"] for i in data_dic["prefectures_data"]])
 
@@ -76,6 +85,9 @@ def handle_message(event):
     get_data_dic()
 
     if not data_dic:
+        output_msg = "APIを取得することができませんでした。"
+
+    elif cal_time() >= 7200:
         output_msg = "技術的な問題が発生しています。"
 
     elif input_msg == "ヘルプ":
@@ -133,4 +145,7 @@ def handle_message(event):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, threaded=True, debug=True)
+    app.run(threaded=True)
+
+    # デバッグ
+    # app.run(host="0.0.0.0", port=8000, threaded=True, debug=True)
