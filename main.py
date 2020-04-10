@@ -1,11 +1,12 @@
 import os
 import textwrap
 import requests
+from collections import Counter
 from flask import Flask, request, abort
 from datetime import datetime, timedelta, timezone
 from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
-from linebot.models import (MessageEvent, TextMessage, TextSendMessage)
+from linebot.models import (MessageEvent, TextMessage, TextSendMessage, QuickReply, MessageAction, QuickReplyButton)
 
 # 都道府県リスト
 pref_list = [
@@ -58,6 +59,11 @@ def get_total_deaths():
 
 def get_pref_data(pref_name):
     return data_dic["prefectures_data"][pref_name]
+
+def get_main_pref():
+    pref_data = {}
+    [pref_data.update({i: data_dic["prefectures_data"][i]["cases"]}) for i in data_dic["prefectures_data"]]
+    return [i for i, j in Counter(pref_data).most_common()][:13]
 
 @app.route("/callback", methods=["POST"])
 def callback():
@@ -136,11 +142,13 @@ def handle_message(event):
         ※ ダブルクォーテーションは付けないでください。
            """).strip() + "\n"
 
-    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=output_msg))
+    # 感染者数上位13都市を取得、QuickReplayと指定使用
+    items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_main_pref()]
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=output_msg, quick_reply=QuickReply(items=items)))
 
 
 if __name__ == "__main__":
-    app.run(threaded=True)
+    # app.run(threaded=True)
 
     # デバッグ
-    # app.run(host="0.0.0.0", port=8000, threaded=True, debug=True)
+    app.run(host="0.0.0.0", port=8000, threaded=True, debug=True)
