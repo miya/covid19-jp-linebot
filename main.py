@@ -29,10 +29,7 @@ line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 # API
-base_url = {
-    "main_url": "https://miya.github.io/covid19-jp-api/prefectures.json",
-    "sub_url": "https://raw.githubusercontent.com/miya/covid19-jp-api/gh-pages/prefectures.json"
-}
+base_url = "https://raw.githubusercontent.com/miya/covid19-jp-api/api/prefectures.json"
 
 # jsonレスポンスが格納される
 data_dic = {}
@@ -40,12 +37,10 @@ data_dic = {}
 
 def get_data_dic():
     global data_dic
-    for url in base_url:
-        r = requests.get(base_url[url])
-        s = r.status_code
-        if s == 200:
-            data_dic = r.json()
-            break
+    r = requests.get(base_url)
+    s = r.status_code
+    if s == 200:
+        data_dic = r.json()
 
 def cal_time():
     jst = timezone(timedelta(hours=+9), "JST")
