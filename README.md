@@ -1,7 +1,7 @@
 # covid19-jp-linebot
 <a href="https://lin.ee/5rrZ2Ur"><img src="https://scdn.line-apps.com/n/line_add_friends/btn/ja.png" alt="友だち追加" height="36" border="0"></a> 
 
-🦠コロナウイルスによる日本国内の感染者数・死亡者数を調べることができるLINE
+🦠コロナウイルスによる日本国内の感染者数・死亡者数を調べることができるlinebot
 
 ## Demo
 <img src="https://raw.githubusercontent.com/wiki/miya/covid19-jp-linebot/images/sample.gif" width="320">
