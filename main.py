@@ -94,8 +94,8 @@ def get_main_pref():
     return sorted_list
 
 
-def create_text_message(output_msg, is_get_data=True):
-    if is_get_data:
+def create_text_message(output_msg, is_exist_data=True):
+    if is_exist_data:
         items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_main_pref()]
         return TextSendMessage(output_msg, quick_reply=QuickReply(items=items))
     else:
@@ -138,13 +138,13 @@ def handle_message(event):
         if data_dic:
             msg_obj = create_text_message(help_template)
         else:
-            msg_obj = create_text_message(help_template, is_get_data=False)
+            msg_obj = create_text_message(help_template, is_exist_data=False)
 
     elif not data_dic:
-        msg_obj = create_text_message("APIを取得することができませんでした。", is_get_data=False)
+        msg_obj = create_text_message("APIを取得することができませんでした。", is_exist_data=False)
 
     elif cal_time() >= 7200:
-        msg_obj = create_text_message("技術的な問題が発生しています。", is_get_data=False)
+        msg_obj = create_text_message("技術的な問題が発生しています。", is_exist_data=False)
 
     elif input_msg == "全国":
         update = data_dic["update"] + " 更新"
