@@ -1,24 +1,13 @@
 import os
-import textwrap
+import setting
 import requests
 from collections import Counter
-from flask import Flask, request, abort
 from datetime import datetime, timedelta, timezone
+from flask import Flask, request, abort
 from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
-from linebot.models import (MessageEvent, TextMessage, TextSendMessage, QuickReply, MessageAction, QuickReplyButton)
-
-# 都道府県リスト
-pref_list = [
-    "北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県",
-    "福島県", "茨城県", "栃木県", "群馬県", "埼玉県", "千葉県",
-    "東京都", "神奈川県", "新潟県", "富山県", "石川県", "福井県",
-    "山梨県", "長野県", "岐阜県", "静岡県", "愛知県", "三重県",
-    "滋賀県", "京都府", "大阪府", "兵庫県", "奈良県", "和歌山県",
-    "鳥取県", "島根県", "岡山県", "広島県", "山口県", "徳島県",
-    "香川県", "愛媛県", "高知県", "福岡県", "佐賀県", "長崎県",
-    "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県"
-]
+from linebot.models import (MessageEvent, TextMessage, TextSendMessage, FlexSendMessage, QuickReply,
+                            QuickReplyButton, MessageAction)
 
 # Flaskのインスタンス
 app = Flask(__name__)
@@ -35,6 +24,18 @@ base_url = "https://raw.githubusercontent.com/miya/covid19-jp-api/api/prefecture
 # jsonレスポンスが格納される
 data_dic = {}
 
+# フレックスメッセージテンプレート
+flex_message_template = setting.flex_message_template
+
+# ヘルプメッセージテンプレート
+help_template = setting.help_template
+
+# 誤送信時メッセージテンプレート
+failure_template = setting.failure_template
+
+# 都道府県名リスト
+pref_list = setting.pref_list
+
 
 def get_data_dic():
     global data_dic
@@ -42,6 +43,7 @@ def get_data_dic():
     s = r.status_code
     if s == 200:
         data_dic = r.json()
+
 
 def cal_time():
     jst = timezone(timedelta(hours=+9), "JST")
@@ -51,19 +53,66 @@ def cal_time():
     now_time = datetime(nowtmp.year, nowtmp.month, nowtmp.day, nowtmp.hour, nowtmp.minute)
     return (now_time - update_time).seconds
 
+
 def get_total_cases():
     return sum([data_dic["prefectures_data"][i]["cases"] for i in data_dic["prefectures_data"]])
+
+
+def get_before_total_cases():
+    return sum([data_dic["before_prefectures_data"][i]["cases"] for i in data_dic["before_prefectures_data"]])
+
 
 def get_total_deaths():
     return sum([data_dic["prefectures_data"][i]["deaths"] for i in data_dic["prefectures_data"]])
 
-def get_pref_data(pref_name):
-    return data_dic["prefectures_data"][pref_name]
+
+def get_before_total_deaths():
+    return sum([data_dic["before_prefectures_data"][i]["deaths"] for i in data_dic["before_prefectures_data"]])
+
+
+def get_pref_cases(pref_name):
+    return data_dic["prefectures_data"][pref_name]["cases"]
+
+
+def get_before_pref_cases(pref_name):
+    return data_dic["before_prefectures_data"][pref_name]["cases"]
+
+
+def get_pref_deaths(pref_name):
+    return data_dic["prefectures_data"][pref_name]["deaths"]
+
+
+def get_before_pref_deaths(pref_name):
+    return data_dic["before_prefectures_data"][pref_name]["deaths"]
+
 
 def get_main_pref():
     pref_data = {}
     [pref_data.update({i: data_dic["prefectures_data"][i]["cases"]}) for i in data_dic["prefectures_data"]]
-    return [i for i, j in Counter(pref_data).most_common()][:13]
+    sorted_list = [i for i, j in Counter(pref_data).most_common()][:12]
+    sorted_list.insert(0, "全国")
+    return sorted_list
+
+
+def create_text_message(output_msg, qr=True):
+    if qr:
+        items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_main_pref()]
+        return TextSendMessage(output_msg, quick_reply=QuickReply(items=items))
+    else:
+        items = [QuickReplyButton(action=MessageAction(label="ヘルプ", text="ヘルプ"))]
+        return TextSendMessage(output_msg, quick_reply=QuickReply(items=items))
+
+
+def create_flex_message(pref_name, update, cases, before_cases, deaths, before_deaths, output_msg):
+    flex_message_template["body"]["contents"][0]["text"] = pref_name  # 都道府県名
+    flex_message_template["body"]["contents"][1]["text"] = update  # 更新時間
+    flex_message_template["body"]["contents"][2]["contents"][1]["contents"][1]["text"] = cases  # 感染者数
+    flex_message_template["body"]["contents"][2]["contents"][1]["contents"][3]["text"] = before_cases  # 感染者数前日比
+    flex_message_template["body"]["contents"][2]["contents"][2]["contents"][1]["text"] = deaths  # 死亡者数
+    flex_message_template["body"]["contents"][2]["contents"][2]["contents"][3]["text"] = before_deaths  # 死亡者数前日比
+    items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_main_pref()]
+    return FlexSendMessage(alt_text=output_msg, contents=flex_message_template, quick_reply=QuickReply(items=items))
+
 
 @app.route("/callback", methods=["POST"])
 def callback():
@@ -76,79 +125,85 @@ def callback():
         abort(400)
     return "OK"
 
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-
     # 入力された文字列を格納
     input_msg = event.message.text
 
     # グローバル変数"data_dic"にデータを格納
     get_data_dic()
+    s
+    if input_msg == "ヘルプ":
+        if data_dic:
+            msg_obj = create_text_message(help_template)
+        else:
+            msg_obj = create_text_message(help_template, qr=False)
 
-    if not data_dic:
-        output_msg = "APIを取得することができませんでした。"
+    elif not data_dic:
+        msg_obj = create_text_message("APIを取得することができませんでした。", qr=False)
 
     elif cal_time() >= 7200:
-        output_msg = "技術的な問題が発生しています。"
+        msg_obj = create_text_message("技術的な問題が発生しています。", qr=False)
 
-    elif input_msg == "ヘルプ":
-        output_msg = textwrap.dedent("""
-        コロナウイルスによる日本国内の感染者数、死亡者数を調べることができます。データは２時間ごとに更新されます。
-        
-        \"感染者数\"
-        > 日本国内の感染者総数
-        
-        \"死亡者数\"
-        > 日本国内の死亡者総数
-        
-        \"都道府県名\"
-        > 各都道府県の感染者数と死亡者数
-        🙆‍♂️ 東京都  🙅‍♂️ 東京 
-        
-        データ元: https://bit.ly/2RfpBGN
-        ソースコード: https://bit.ly/2UNM8fZ
-        作者: https://bit.ly/3aKTx5h
-           """).strip() + "\n"
+    elif input_msg == "全国":
+        update = data_dic["update"] + " 更新"
+        cases = get_total_cases()
+        deaths = get_total_deaths()
+        before_cases = get_before_total_cases()
+        before_deaths = get_before_total_deaths()
+        output_msg = "【日本国内】\n感染者数: {} / 死亡者数: {}".format(cases, deaths)
 
-    elif input_msg == "感染者数":
-        output_msg = "日本国内の感染者数は{}人です。".format(get_total_cases())
+        if cases >= before_cases:
+            bcases = "+" + str(cases - before_cases) + "人"
+        else:
+            bcases = "-" + str(before_cases - cases) + "人"
 
-    elif input_msg == "死亡者数":
-        output_msg = "日本国内の死亡者数は{}人です。".format(get_total_deaths())
+        bdeaths = "+" + str(deaths - before_deaths) + "人"
+
+        msg_obj = create_flex_message(
+            pref_name="日本国内",
+            update=update,
+            cases=str(cases) + "人",
+            before_cases=bcases,
+            deaths=str(deaths) + "人",
+            before_deaths=bdeaths,
+            output_msg=output_msg)
 
     elif input_msg in list(pref_list):
-        pref_data = get_pref_data(input_msg)
-        cases_num = pref_data["cases"]
-        deaths_num = pref_data["deaths"]
-        output_msg = "【{}】\n感染者数: {}人 / 死亡者数: {}人".format(input_msg, cases_num, deaths_num)
+        update = data_dic["update"] + " 更新"
+
+        cases = get_pref_cases(input_msg)
+        deaths = get_pref_deaths(input_msg)
+        before_cases = get_before_pref_cases(input_msg)
+        before_deaths = get_before_pref_deaths(input_msg)
+
+        if cases >= before_cases:
+            bcases = "+" + str(cases - before_cases) + "人"
+        else:
+            bcases = "-" + str(before_cases - cases) + "人"
+
+        bdeaths = "+" + str(deaths - before_deaths) + "人"
+
+        output_msg = "【{}】\n感染者数: {} / 死亡者数: {}".format(input_msg, cases, deaths)
+
+        msg_obj = create_flex_message(
+            pref_name=input_msg,
+            update=update,
+            cases=str(cases) + "人",
+            before_cases=bcases,
+            deaths=str(deaths) + "人",
+            before_deaths=bdeaths,
+            output_msg=output_msg)
 
     else:
-        output_msg = textwrap.dedent("""
-        入力された値が間違っています。
-        
-        \"ヘルプ\"
-        > LINE BOTの詳細情報
-        
-        \"感染者数\"
-        > 日本国内の感染者総数
-        
-        \"死亡者数\"
-        > 日本国内の死亡者総数
-        
-        \"都道府県名\"
-        > 各都道府県の感染者数と死亡者数
-        🙆‍♂️ 東京都  🙅‍♂️ 東京
-        
-        ※ ダブルクォーテーションは付けないでください。
-           """).strip() + "\n"
+        msg_obj = create_text_message(failure_template)
 
-    # 感染者数上位13都市を取得、QuickReplayと指定使用
-    items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_main_pref()]
-    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=output_msg, quick_reply=QuickReply(items=items)))
+    line_bot_api.reply_message(event.reply_token, messages=msg_obj)
 
 
 if __name__ == "__main__":
     # app.run(threaded=True)
 
     # デバッグ
-    app.run(host="0.0.0.0", port=8000, threaded=True, debug=True)
+    app.run(host="0.0.0.0", port=8080, threaded=True, debug=True)
