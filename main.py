@@ -55,19 +55,19 @@ def cal_time():
 
 
 def get_total_cases():
-    return sum([data_dic["prefectures_data"][i]["cases"] for i in data_dic["prefectures_data"]])
+    return data_dic["total_nums"]["total_cases"]
 
 
 def get_before_total_cases():
-    return sum([data_dic["before_prefectures_data"][i]["cases"] for i in data_dic["before_prefectures_data"]])
+    return data_dic["before_total_nums"]["total_cases"]
 
 
 def get_total_deaths():
-    return sum([data_dic["prefectures_data"][i]["deaths"] for i in data_dic["prefectures_data"]])
+    return data_dic["total_nums"]["total_deaths"]
 
 
 def get_before_total_deaths():
-    return sum([data_dic["before_prefectures_data"][i]["deaths"] for i in data_dic["before_prefectures_data"]])
+    return data_dic["before_total_nums"]["total_deaths"]
 
 
 def get_pref_cases(pref_name):
@@ -203,7 +203,7 @@ def handle_message(event):
 
 
 if __name__ == "__main__":
-    # app.run(threaded=True)
+    app.run(threaded=True)
 
     # デバッグ
-    app.run(host="0.0.0.0", port=8080, threaded=True, debug=True)
+    # app.run(host="0.0.0.0", port=8080, threaded=True, debug=True)
