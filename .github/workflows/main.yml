@@ -14,7 +14,7 @@ jobs:
     - name: install requirements.txt
       run: |
         sudo apt-get install python3-setuptools
-        pip3 install -r requirements.txt
+        pip3 install -r get_prefectures_data/requirements.txt
 
     - name: save firestore
       run: python3 get_prefectures_data/get_prefectures_data.py
