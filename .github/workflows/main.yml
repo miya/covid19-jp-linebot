@@ -12,8 +12,3 @@ jobs:
 
     - name: install requirements.txt
       run: curl ${{ secrets.CLOUD_FUNCTIONS_TRIGGER }}
-
-
-
-        
-        
