@@ -6,6 +6,7 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 from datetime import datetime, timedelta, timezone
 
+
 # FireBase
 service_account_key = {
     "type": os.environ.get("type"),
@@ -20,7 +21,11 @@ service_account_key = {
     "client_x509_cert_url": os.environ.get("client_x509_cert_url")
 }
 cred = credentials.Certificate(service_account_key)
-firebase_admin.initialize_app(cred)
+
+# [ValueError: The default Firebase app already exists.]対策
+if len(firebase_admin._apps) == 0:
+    firebase_admin.initialize_app(cred)
+
 db = firestore.client()
 
 # 都道府県の単位を合わせる用 東京 => 東京都
@@ -51,12 +56,15 @@ data_dic = {
 
 
 def send_data_to_firestore(ok):
+
+    # 初期化〜
     prefectures = {}
     json_dic = {}
     total_cases = 0
     total_deaths = 0
     cnt = 0
 
+    # 5回getして200じゃなかったら諦める
     for i in range(5):
         r = requests.get(base_url)
         s = r.status_code
@@ -65,7 +73,7 @@ def send_data_to_firestore(ok):
             break
         else:
             cnt += 1
-            sleep(1)
+            sleep(10)
         if cnt >= 4:
             print("データを取得できませんでした。")
             exit()
@@ -110,5 +118,4 @@ def send_data_to_firestore(ok):
     doc_num = str(datetime.now(jst).hour)
     db.collection("data").document(doc_num).set(data_dic)
     return now
-
 
