@@ -1,7 +1,13 @@
-.idea
-.gcloudignore
 .git
+.idea
+.github
 .DS_Store
+.gitignore
+.gcloudignore
+
+__pycache__
+
 test.py
 get_prefectures_data.py
-__pycache__
+README.md
+LICENSE

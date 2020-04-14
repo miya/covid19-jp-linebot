@@ -1,4 +1,4 @@
 flask
-requests
+firebase-admin
 gunicorn
 line-bot-sdk
