@@ -1,9 +1,11 @@
 import os
 import setting
-import requests
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from flask import Flask, request, abort
+import firebase_admin
+from firebase_admin import firestore
+from firebase_admin import credentials
 from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
 from linebot.models import (MessageEvent, TextMessage, TextSendMessage, FlexSendMessage, QuickReply,
@@ -12,17 +14,17 @@ from linebot.models import (MessageEvent, TextMessage, TextSendMessage, FlexSend
 # Flaskのインスタンス
 app = Flask(__name__)
 
-# アクセストークンの設定
+# Line Messaging API
 LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
 LINE_CHANNEL_SECRET = os.environ.get("LINE_CHANNEL_SECRET")
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
-# API
-base_url = "https://raw.githubusercontent.com/miya/covid19-jp-api/api/prefectures.json"
-
-# jsonレスポンスが格納される
-data_dic = {}
+# FireBase
+cred = credentials.Certificate("serviceAccountKey.json")
+firebase_admin.initialize_app(cred)
+db = firestore.client()
+col_ref = db.collection("data")
 
 # フレックスメッセージテンプレート
 flex_message_template = setting.flex_message_template
@@ -36,59 +38,52 @@ failure_template = setting.failure_template
 # 都道府県名リスト
 pref_list = setting.pref_list
 
-
-def get_data_dic():
-    global data_dic
-    r = requests.get(base_url)
-    s = r.status_code
-    if s == 200:
-        data_dic = r.json()
+# 現在時刻
+n = str(datetime.now((timezone(timedelta(hours=+9), "JST"))).hour)
+# 現在時刻+1(25時間前)
+b = str(datetime.now(timezone(timedelta(hours=+10), "JST")).hour)
 
 
-def cal_time():
-    jst = timezone(timedelta(hours=+9), "JST")
-    uptmp = datetime.strptime(data_dic["update"], "%Y-%m-%d %H:%M")
-    update_time = datetime(uptmp.year, uptmp.month, uptmp.day, uptmp.hour, uptmp.minute)
-    nowtmp = datetime.now(jst)
-    now_time = datetime(nowtmp.year, nowtmp.month, nowtmp.day, nowtmp.hour, nowtmp.minute)
-    return (now_time - update_time).seconds
+def get_update():
+    return col_ref.document(n).get().to_dict()["detail"]["update"]
 
 
 def get_total_cases():
-    return data_dic["total_nums"]["total_cases"]
+    return col_ref.document(n).get().to_dict()["total"]["total_cases"]
 
 
 def get_before_total_cases():
-    return data_dic["before_total_nums"]["total_cases"]
+    return col_ref.document(b).get().to_dict()["total"]["total_cases"]
 
 
 def get_total_deaths():
-    return data_dic["total_nums"]["total_deaths"]
+    return col_ref.document(n).get().to_dict()["total"]["total_deaths"]
 
 
 def get_before_total_deaths():
-    return data_dic["before_total_nums"]["total_deaths"]
+    return col_ref.document(b).get().to_dict()["total"]["total_deaths"]
 
 
 def get_pref_cases(pref_name):
-    return data_dic["prefectures_data"][pref_name]["cases"]
+    return col_ref.document(n).get().to_dict()["prefectures"][pref_name]["cases"]
 
 
 def get_before_pref_cases(pref_name):
-    return data_dic["before_prefectures_data"][pref_name]["cases"]
+    return col_ref.document(b).get().to_dict()["prefectures"][pref_name]["cases"]
 
 
 def get_pref_deaths(pref_name):
-    return data_dic["prefectures_data"][pref_name]["deaths"]
+    return col_ref.document(n).get().to_dict()["prefectures"][pref_name]["deaths"]
 
 
 def get_before_pref_deaths(pref_name):
-    return data_dic["before_prefectures_data"][pref_name]["deaths"]
+    return col_ref.document(b).get().to_dict()["prefectures"][pref_name]["deaths"]
 
 
-def get_main_pref():
+def get_top_pref():
     pref_data = {}
-    [pref_data.update({i: data_dic["prefectures_data"][i]["cases"]}) for i in data_dic["prefectures_data"]]
+    pref = col_ref.document(n).get().to_dict()["prefectures"]
+    [pref_data.update({i: pref[i]["cases"]}) for i in pref]
     sorted_list = [i for i, j in Counter(pref_data).most_common()][:12]
     sorted_list.insert(0, "全国")
     return sorted_list
@@ -96,7 +91,7 @@ def get_main_pref():
 
 def create_text_message(output_msg, is_exist_data=True):
     if is_exist_data:
-        items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_main_pref()]
+        items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_top_pref()]
         return TextSendMessage(output_msg, quick_reply=QuickReply(items=items))
     else:
         items = [QuickReplyButton(action=MessageAction(label="ヘルプ", text="ヘルプ"))]
@@ -110,7 +105,7 @@ def create_flex_message(pref_name, update, cases, before_cases, deaths, before_d
     flex_message_template["body"]["contents"][2]["contents"][1]["contents"][3]["text"] = before_cases  # 感染者数前日比
     flex_message_template["body"]["contents"][2]["contents"][2]["contents"][1]["text"] = deaths  # 死亡者数
     flex_message_template["body"]["contents"][2]["contents"][2]["contents"][3]["text"] = before_deaths  # 死亡者数前日比
-    items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_main_pref()]
+    items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_top_pref()]
     return FlexSendMessage(alt_text=output_msg, contents=flex_message_template, quick_reply=QuickReply(items=items))
 
 
@@ -128,26 +123,15 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+
     # 入力された文字列を格納
     input_msg = event.message.text
 
-    # グローバル変数"data_dic"にデータを格納
-    get_data_dic()
-
     if input_msg == "ヘルプ":
-        if data_dic:
-            msg_obj = create_text_message(help_template)
-        else:
-            msg_obj = create_text_message(help_template, is_exist_data=False)
-
-    elif not data_dic:
-        msg_obj = create_text_message("APIを取得することができませんでした。", is_exist_data=False)
-
-    elif cal_time() >= 7200:
-        msg_obj = create_text_message("技術的な問題が発生しています。", is_exist_data=False)
+        msg_obj = create_text_message(help_template)
 
     elif input_msg == "全国":
-        update = data_dic["update"] + " 更新"
+        update = get_update() + " 更新"
         cases = get_total_cases()
         deaths = get_total_deaths()
         before_cases = get_before_total_cases()
@@ -171,7 +155,7 @@ def handle_message(event):
             output_msg=output_msg)
 
     elif input_msg in list(pref_list):
-        update = data_dic["update"] + " 更新"
+        update = get_update() + " 更新"
 
         cases = get_pref_cases(input_msg)
         deaths = get_pref_deaths(input_msg)
@@ -203,7 +187,7 @@ def handle_message(event):
 
 
 if __name__ == "__main__":
-    app.run(threaded=True)
+    # app.run(threaded=True)
 
     # デバッグ
-    # app.run(host="0.0.0.0", port=8080, threaded=True, debug=True)
+    app.run(host="0.0.0.0", port=8080, threaded=True, debug=True)
