@@ -107,7 +107,7 @@ def send_data_to_firestore(ok):
 
     # データを格納
     data_dic.update({
-        "detail": now,
+        "detail": {"update": now},
         "prefectures": prefectures,
         "total": {
             "total_cases": total_cases,
@@ -117,5 +117,4 @@ def send_data_to_firestore(ok):
 
     doc_num = str(datetime.now(jst).hour)
     db.collection("data").document(doc_num).set(data_dic)
-    return now
-
+    db.collection("data").document("24").set(data_dic)
