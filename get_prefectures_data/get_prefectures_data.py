@@ -45,22 +45,15 @@ base_url = "https://covid19-japan-web-api.now.sh/api/v1/prefectures"
 
 # 公開用dictionary
 data_dic = {
-    "detail": {
-        "update": now
-    },
-    "prefectures": {
-        "": {
-            "cases": 0,
-            "deaths": 0
-        }
-    },
+    "detail": {"update": now},
+    "prefectures": {},
     "total": {
         "total_cases": 0,
         "total_deaths": 0
     }
 }
 
-def create_json():
+def create_data_dic():
     prefectures = {}
     json_dic = {}
     total_cases = 0
@@ -114,6 +107,6 @@ def create_json():
 
 
 if __name__ == "__main__":
-    create_json()
+    create_data_dic()
     doc_num = str(datetime.now(jst).hour)
     db.collection("data").document(doc_num).set(data_dic)
