@@ -13,8 +13,8 @@ jobs:
 
     - name: install requirements.txt
       run: |
-        sudo pip3 install firebase-admin
-        sudo pip3 install requests
+        sudo apt-get install python3-setuptools
+        pip3 install -r requirements.txt
 
     - name: save firestore
       run: python3 get_prefectures_data/get_prefectures_data.py
