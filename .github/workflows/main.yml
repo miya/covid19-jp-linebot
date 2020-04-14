@@ -12,9 +12,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: install requirements.txt
-      run: |
-        sudo apt-get install python3-setuptools
-        pip3 install -r requirements.txt
+      run: pip3 install -r requirements.txt
 
     - name: save firestore
       run: python3 get_prefectures_data/get_prefectures_data.py
