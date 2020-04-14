@@ -1,3 +1,9 @@
+"""
+requirements.txt
+* requests
+* firebase-admin
+"""
+
 import os
 import requests
 from time import sleep
@@ -7,7 +13,7 @@ from firebase_admin import firestore
 from datetime import datetime, timedelta, timezone
 
 
-# FireBase
+# firestore
 service_account_key = {
     "type": os.environ.get("type"),
     "project_id": os.environ.get("project_id"),
@@ -115,6 +121,7 @@ def send_data_to_firestore(ok):
         }
     })
 
+    # firestoreに保存
     doc_num = str(datetime.now(jst).hour)
     db.collection("data").document(doc_num).set(data_dic)
     db.collection("data").document("24").set(data_dic)
