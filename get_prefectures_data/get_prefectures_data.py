@@ -6,6 +6,7 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 from datetime import datetime, timedelta, timezone
 
+# FireBase
 service_account_key = {
     "type": os.environ.get("type"),
     "project_id": os.environ.get("project_id"),
@@ -18,7 +19,6 @@ service_account_key = {
     "auth_provider_x509_cert_url": os.environ.get("auth_provider_x509_cert_url"),
     "client_x509_cert_url": os.environ.get("client_x509_cert_url")
 }
-
 cred = credentials.Certificate(service_account_key)
 firebase_admin.initialize_app(cred)
 db = firestore.client()
@@ -36,16 +36,12 @@ k = [
     "宮崎", "鹿児島", "沖縄"
 ]
 
-# アップデート時間
-jst = timezone(timedelta(hours=+9), "JST")
-now = datetime.now(jst).strftime("%Y-%m-%d %H:%M")
-
 # API
 base_url = "https://covid19-japan-web-api.now.sh/api/v1/prefectures"
 
 # 公開用dictionary
 data_dic = {
-    "detail": {"update": now},
+    "detail": {"update": ""},
     "prefectures": {},
     "total": {
         "total_cases": 0,
@@ -54,7 +50,7 @@ data_dic = {
 }
 
 
-def create_data_dic():
+def send_data_to_firestore(ok):
     prefectures = {}
     json_dic = {}
     total_cases = 0
@@ -97,8 +93,13 @@ def create_data_dic():
             }
         })
 
-    # 公開用jsonにデータを格納
+    # アップデート時間
+    jst = timezone(timedelta(hours=+9), "JST")
+    now = datetime.now(jst).strftime("%Y-%m-%d %H:%M")
+
+    # データを格納
     data_dic.update({
+        "detail": now,
         "prefectures": prefectures,
         "total": {
             "total_cases": total_cases,
@@ -106,9 +107,8 @@ def create_data_dic():
         }
     })
 
-
-def run(ok):
-    create_data_dic()
     doc_num = str(datetime.now(jst).hour)
     db.collection("data").document(doc_num).set(data_dic)
+    return now
+
 
