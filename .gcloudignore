@@ -3,3 +3,5 @@
 .git
 .DS_Store
 test.py
+get_prefectures_data.py
+__pycache__
