@@ -38,10 +38,9 @@ failure_template = setting.failure_template
 # 都道府県名リスト
 pref_list = setting.pref_list
 
-# 現在時刻
-n = str(datetime.now((timezone(timedelta(hours=+9), "JST"))).hour)
-# 現在時刻+1(25時間前)
-b = str(datetime.now(timezone(timedelta(hours=+10), "JST")).hour)
+# Firebaseのドキュメント値 [now, before]
+n = "24"
+b = ""
 
 
 def get_update():
@@ -124,6 +123,11 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
 
+    global b
+
+    # 現在時刻+1(25時間前)
+    b = str(datetime.now(timezone(timedelta(hours=+10), "JST")).hour)
+
     # 入力された文字列を格納
     input_msg = event.message.text
 
@@ -187,7 +191,7 @@ def handle_message(event):
 
 
 if __name__ == "__main__":
-    # app.run(threaded=True)
+    app.run(threaded=True)
 
     # デバッグ
-    app.run(host="0.0.0.0", port=8080, threaded=True, debug=True)
+    # app.run(host="0.0.0.0", port=8080, threaded=True, debug=True)
