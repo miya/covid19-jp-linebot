@@ -1,7 +1,7 @@
 import os
 import setting
+from datetime import datetime
 from collections import Counter
-from datetime import datetime, timedelta, timezone
 from flask import Flask, request, abort
 import firebase_admin
 from firebase_admin import firestore
@@ -44,42 +44,112 @@ b = ""
 
 
 def get_update():
+    """
+    Returns
+    -------
+    アップデート時間: str
+    """
     return col_ref.document(n).get().to_dict()["detail"]["update"]
 
 
 def get_total_cases():
+    """
+    Returns
+    -------
+    全国の現在の総感染者数: int
+    """
     return col_ref.document(n).get().to_dict()["total"]["total_cases"]
 
 
 def get_before_total_cases():
+    """
+    Returns
+    -------
+    全国の前日の総感染者数: int
+    """
     return col_ref.document(b).get().to_dict()["total"]["total_cases"]
 
 
 def get_total_deaths():
+    """
+    Returns
+    -------
+    全国の現在の総死亡者数: int
+    """
     return col_ref.document(n).get().to_dict()["total"]["total_deaths"]
 
 
 def get_before_total_deaths():
+    """
+    Returns
+    -------
+    全国の前日の総死亡者数の取得: int
+    """
     return col_ref.document(b).get().to_dict()["total"]["total_deaths"]
 
 
 def get_pref_cases(pref_name):
+    """
+    Parameters
+    ----------
+    pref_name: str
+        都道府県名
+
+    Returns
+    -------
+    対象の現在の総感染者数: int
+    """
     return col_ref.document(n).get().to_dict()["prefectures"][pref_name]["cases"]
 
 
 def get_before_pref_cases(pref_name):
+    """
+    Parameters
+    ----------
+    pref_name: str
+        都道府県名
+
+    Returns
+    -------
+    対象の前日の総感染者数: int
+    """
     return col_ref.document(b).get().to_dict()["prefectures"][pref_name]["cases"]
 
 
 def get_pref_deaths(pref_name):
+    """
+    Parameters
+    ----------
+    pref_name: str
+        都道府県名
+
+    Returns
+    -------
+    対象の現在の総死亡者数: int
+    """
     return col_ref.document(n).get().to_dict()["prefectures"][pref_name]["deaths"]
 
 
 def get_before_pref_deaths(pref_name):
+    """
+    Parameters
+    ----------
+    pref_name: str
+        都道府県名
+
+    Returns
+    -------
+    対象の前日の総死亡者数: int
+    """
     return col_ref.document(b).get().to_dict()["prefectures"][pref_name]["deaths"]
 
 
 def get_top_pref():
+    """
+    Returns
+    -------
+    全国 + 現在の感染者数上位12都市: list
+    """
     pref_data = {}
     pref = col_ref.document(n).get().to_dict()["prefectures"]
     [pref_data.update({i: pref[i]["cases"]}) for i in pref]
@@ -98,6 +168,30 @@ def create_text_message(output_msg, is_exist_data=True):
 
 
 def create_flex_message(pref_name, update, cases, before_cases, deaths, before_deaths, output_msg):
+    """
+    FlexMessage、QuickReplyの生成
+
+    Parameters
+    ----------
+    pref_name: str
+        都道府県名
+    update: str
+        アップデート時間
+    cases: str
+        現在の感染者数
+    before_cases: str
+        前日の感染者数
+    deaths: str
+        現在の死亡者数
+    before_deaths: str
+        前日の死亡者数
+    output_msg: str
+        メッセージ本文
+
+    Returns
+    -------
+    FlexMessageObject
+    """
     flex_message_template["body"]["contents"][0]["text"] = pref_name  # 都道府県名
     flex_message_template["body"]["contents"][1]["text"] = update  # 更新時間
     flex_message_template["body"]["contents"][2]["contents"][1]["contents"][1]["text"] = cases  # 感染者数
@@ -125,9 +219,6 @@ def handle_message(event):
 
     global b
 
-    # 現在時刻+1(25時間前)
-    b = str(datetime.now(timezone(timedelta(hours=+10), "JST")).hour)
-
     # 入力された文字列を格納
     input_msg = event.message.text
 
@@ -136,6 +227,12 @@ def handle_message(event):
 
     elif input_msg == "全国":
         update = get_update() + " 更新"
+
+        # 現在時刻+1(25時間前)
+        b = str(datetime.strptime(update, "%Y-%m-%d %H:%M 更新").hour + 1)
+        if b == "24":
+            b = "0"
+
         cases = get_total_cases()
         deaths = get_total_deaths()
         before_cases = get_before_total_cases()
@@ -160,6 +257,10 @@ def handle_message(event):
 
     elif input_msg in list(pref_list):
         update = get_update() + " 更新"
+
+        b = str(datetime.strptime(update, "%Y-%m-%d %H:%M 更新").hour + 1)
+        if b == "24":
+            b = "0"
 
         cases = get_pref_cases(input_msg)
         deaths = get_pref_deaths(input_msg)
@@ -194,4 +295,4 @@ if __name__ == "__main__":
     app.run(threaded=True)
 
     # デバッグ
-    # app.run(host="0.0.0.0", port=8080, threaded=True, debug=True)
+    # app.run(host="0.0.0.0", port=7399, threaded=True, debug=True)
