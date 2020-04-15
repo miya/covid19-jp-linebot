@@ -4,13 +4,9 @@
 
 🦠 コロナウイルスによる日本国内の感染者数・死亡者数の情報を取得できるLINEbot
 
-
-
 ## Demo
 
-![](https://user-images.githubusercontent.com/34241526/79368113-db9d7d00-7f89-11ea-89f9-a3803bf48c83.png)
-
-
+![](https://user-images.githubusercontent.com/34241526/79329941-99f1df80-7f53-11ea-9e6d-d125476aba58.png)
 
 ## Data Source
 
@@ -37,7 +33,7 @@
 * CloudFunctionsでAPIを叩きJSONデータを取得、CloudFirestoreに保存
 * LINEBotにメッセージ送信された時にCloudFirestoreからデータを取得して返信
 
-![](https://user-images.githubusercontent.com/34241526/79350601-a2a5de00-7f72-11ea-94e3-3aafbe992481.png)
+![](https://user-images.githubusercontent.com/34241526/79368113-db9d7d00-7f89-11ea-89f9-a3803bf48c83.png)
 
 ## Licence
 
