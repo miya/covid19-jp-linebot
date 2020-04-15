@@ -119,3 +119,7 @@ def send_data_to_firestore(ok):
     doc_num = str(datetime.now(jst).hour)
     db.collection("data").document(doc_num).set(data_dic)
     db.collection("data").document("24").set(data_dic)
+
+
+# debug
+# send_data_to_firestore("ok")
