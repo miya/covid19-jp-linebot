@@ -34,10 +34,10 @@
 ## Specification
 
 * CloudFunctionsでAPIを叩きjsonを解析、Firestoreに書き込む
-* CloudFunctionsのHTTPトリガーとしてGithubActuonsを利用、15分ごとに発動する
+* CloudFunctionsのHTTPトリガーとしてCloudSchedulerを利用、15分ごとに発火させる
 * LINEBotはメッセージを受信した際にFirestoreを読み込み、メッセージを生成し送信
 
-![](https://user-images.githubusercontent.com/34241526/79330060-d3c2e600-7f53-11ea-9969-76fc8fd2522c.png)
+![](https://user-images.githubusercontent.com/34241526/79350601-a2a5de00-7f72-11ea-94e3-3aafbe992481.png)
 
 ## Licence
 
