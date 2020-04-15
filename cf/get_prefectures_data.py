@@ -1,9 +1,3 @@
-"""
-requirements.txt
-* requests
-* firebase-admin
-"""
-
 import os
 import requests
 from time import sleep
