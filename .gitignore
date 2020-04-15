@@ -1,7 +1,7 @@
 .idea
 .DS_Store
 
-secret.yaml
-serviceAccountKey.json
-
 test.py
+
+/gae/serviceAccountKey.json
+gae/secret.yaml
