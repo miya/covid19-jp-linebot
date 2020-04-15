@@ -43,7 +43,7 @@ n = "24"
 b = ""
 
 
-def get_update():
+def get_update() -> str:
     """
     Returns
     -------
@@ -52,7 +52,7 @@ def get_update():
     return col_ref.document(n).get().to_dict()["detail"]["update"]
 
 
-def get_total_cases():
+def get_total_cases() -> int:
     """
     Returns
     -------
@@ -61,7 +61,7 @@ def get_total_cases():
     return col_ref.document(n).get().to_dict()["total"]["total_cases"]
 
 
-def get_before_total_cases():
+def get_before_total_cases() -> int:
     """
     Returns
     -------
@@ -70,7 +70,7 @@ def get_before_total_cases():
     return col_ref.document(b).get().to_dict()["total"]["total_cases"]
 
 
-def get_total_deaths():
+def get_total_deaths() -> int:
     """
     Returns
     -------
@@ -79,7 +79,7 @@ def get_total_deaths():
     return col_ref.document(n).get().to_dict()["total"]["total_deaths"]
 
 
-def get_before_total_deaths():
+def get_before_total_deaths() -> int:
     """
     Returns
     -------
@@ -88,7 +88,7 @@ def get_before_total_deaths():
     return col_ref.document(b).get().to_dict()["total"]["total_deaths"]
 
 
-def get_pref_cases(pref_name):
+def get_pref_cases(pref_name) -> int:
     """
     Parameters
     ----------
@@ -102,7 +102,7 @@ def get_pref_cases(pref_name):
     return col_ref.document(n).get().to_dict()["prefectures"][pref_name]["cases"]
 
 
-def get_before_pref_cases(pref_name):
+def get_before_pref_cases(pref_name) -> int:
     """
     Parameters
     ----------
@@ -116,7 +116,7 @@ def get_before_pref_cases(pref_name):
     return col_ref.document(b).get().to_dict()["prefectures"][pref_name]["cases"]
 
 
-def get_pref_deaths(pref_name):
+def get_pref_deaths(pref_name) -> int:
     """
     Parameters
     ----------
@@ -130,7 +130,7 @@ def get_pref_deaths(pref_name):
     return col_ref.document(n).get().to_dict()["prefectures"][pref_name]["deaths"]
 
 
-def get_before_pref_deaths(pref_name):
+def get_before_pref_deaths(pref_name) -> int:
     """
     Parameters
     ----------
@@ -144,7 +144,7 @@ def get_before_pref_deaths(pref_name):
     return col_ref.document(b).get().to_dict()["prefectures"][pref_name]["deaths"]
 
 
-def get_top_pref():
+def get_top_pref() -> list:
     """
     Returns
     -------
