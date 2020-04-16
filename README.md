@@ -8,7 +8,9 @@
 
 ![](https://user-images.githubusercontent.com/34241526/79442825-03392780-8014-11ea-8541-0a6db3b427b3.png)
 
-## Data Source
+## Data Source 
+
+![UpdateData](https://github.com/ryo-ma/covid19-japan-web-api/workflows/UpdateData/badge.svg)
 
 [ryo-ma/covid19-japan-web-api](https://github.com/ryo-ma/covid19-japan-web-api)
 
@@ -31,7 +33,7 @@
 
 * CloudSchedulerのCronジョブで15分ごとにCloudFunctionsを発火
 * CloudFunctionsでAPIを叩きJSONデータを取得、CloudFirestoreに保存
-* LINEBotにメッセージ送信された時にCloudFirestoreからデータを取得して返信
+* LINEBotにメッセージが送信された時にCloudFirestoreからデータを取得して返信
 
 ![](https://user-images.githubusercontent.com/34241526/79368113-db9d7d00-7f89-11ea-89f9-a3803bf48c83.png)
 
