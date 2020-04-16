@@ -1,7 +1,7 @@
 import textwrap
 
-# FlexMessageテンプレート
-flex_message_template = {
+# メインメッセージテンプレート
+main_message_template = {
     "type": "bubble",
     "body": {
         "type": "box",
@@ -125,8 +125,92 @@ flex_message_template = {
     }
 }
 
+
+# 支援メッセージテンプレート
+donate_message_template ={
+    "type": "bubble",
+    "header": {
+      "type": "box",
+      "layout": "vertical",
+      "flex": 0,
+      "contents": [
+        {
+          "type": "text",
+          "text": "開発者を支援する",
+          "size": "xxl",
+          "align": "center",
+          "color": "#140C0D"
+        },
+        {
+          "type": "separator",
+          "margin": "xl"
+        },
+        {
+          "type": "text",
+          "text": "QRコードを読み取ることで開発者を支援することができます。頂いたお金は開発資金及びサーバーの維持費に当てさせて頂きます。",
+          "margin": "xxl",
+          "align": "start",
+          "weight": "regular",
+          "wrap": True
+        }
+      ]
+    },
+    "body": {
+      "type": "box",
+      "layout": "horizontal",
+      "spacing": "xxl",
+      "contents": [
+        {
+          "type": "box",
+          "layout": "vertical",
+          "contents": [
+            {
+              "type": "image",
+              "url": "https://user-images.githubusercontent.com/34241526/79419791-7631a680-7ff2-11ea-920b-741ee6024440.jpg",
+              "size": "xl"
+            },
+            {
+              "type": "button",
+              "action": {
+                "type": "uri",
+                "label": "PayPay",
+                "uri": "https://user-images.githubusercontent.com/34241526/79419791-7631a680-7ff2-11ea-920b-741ee6024440.jpg"
+              },
+              "color": "#E31515",
+              "margin": "md",
+              "style": "primary"
+            }
+          ]
+        },
+        {
+          "type": "box",
+          "layout": "vertical",
+          "contents": [
+            {
+              "type": "image",
+              "url": "https://user-images.githubusercontent.com/34241526/79419984-e6402c80-7ff2-11ea-9c34-bab74414de7d.jpg",
+              "size": "xl"
+            },
+            {
+              "type": "button",
+              "action": {
+                "type": "uri",
+                "label": "Kyash",
+                "uri": "https://user-images.githubusercontent.com/34241526/79419984-e6402c80-7ff2-11ea-9c34-bab74414de7d.jpg"
+              },
+              "color": "#0890EE",
+              "margin": "md",
+              "style": "primary"
+            }
+          ]
+        }
+      ]
+    }
+}
+
+
 # ヘルプメッセージテンプレート
-help_template = textwrap.dedent("""
+help_message_template = textwrap.dedent("""
     コロナウイルスによる日本国内の感染者数、死亡者数を調べることができます。
 
     🦠 全国
@@ -141,8 +225,9 @@ help_template = textwrap.dedent("""
     作者: https://bit.ly/3aKTx5h
        """).strip() + "\n"
 
+
 # 誤入力メッセージテンプレート
-failure_template = textwrap.dedent("""
+failure_message_template = textwrap.dedent("""
     入力された値が間違っています。
 
     🦠 ヘルプ
@@ -155,6 +240,7 @@ failure_template = textwrap.dedent("""
     > 各都道府県の感染者数と死亡者数
       🙆‍♂️ 東京都  🙅‍♂️ 東京
     """).strip() + "\n"
+
 
 # 都道府県リスト
 pref_list = [

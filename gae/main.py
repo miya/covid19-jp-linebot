@@ -20,26 +20,29 @@ LINE_CHANNEL_SECRET = os.environ.get("LINE_CHANNEL_SECRET")
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
-# FireBase
+# firestore
 cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 col_ref = db.collection("data")
 
 # フレックスメッセージテンプレート
-flex_message_template = setting.flex_message_template
+main_message_template = setting.main_message_template
+
+# 支援メッセージテンプレート
+donate_message_template = setting.donate_message_template
 
 # ヘルプメッセージテンプレート
-help_template = setting.help_template
+help_message_template = setting.help_message_template
 
 # 誤送信時メッセージテンプレート
-failure_template = setting.failure_template
+failure_message_template = setting.failure_message_template
 
 # 都道府県名リスト
 pref_list = setting.pref_list
 
 # Firebaseのドキュメント値 [now, before]
-n = "24"
+n = "now"
 b = ""
 
 
@@ -158,16 +161,7 @@ def get_top_pref() -> list:
     return sorted_list
 
 
-def create_text_message(output_msg, is_exist_data=True):
-    if is_exist_data:
-        items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_top_pref()]
-        return TextSendMessage(output_msg, quick_reply=QuickReply(items=items))
-    else:
-        items = [QuickReplyButton(action=MessageAction(label="ヘルプ", text="ヘルプ"))]
-        return TextSendMessage(output_msg, quick_reply=QuickReply(items=items))
-
-
-def create_flex_message(pref_name, update, cases, before_cases, deaths, before_deaths, output_msg):
+def create_main_message(pref_name, update, cases, before_cases, deaths, before_deaths, output_msg):
     """
     FlexMessage、QuickReplyの生成
 
@@ -192,14 +186,28 @@ def create_flex_message(pref_name, update, cases, before_cases, deaths, before_d
     -------
     FlexMessageObject
     """
-    flex_message_template["body"]["contents"][0]["text"] = pref_name  # 都道府県名
-    flex_message_template["body"]["contents"][1]["text"] = update  # 更新時間
-    flex_message_template["body"]["contents"][2]["contents"][1]["contents"][1]["text"] = cases  # 感染者数
-    flex_message_template["body"]["contents"][2]["contents"][1]["contents"][3]["text"] = before_cases  # 感染者数前日比
-    flex_message_template["body"]["contents"][2]["contents"][2]["contents"][1]["text"] = deaths  # 死亡者数
-    flex_message_template["body"]["contents"][2]["contents"][2]["contents"][3]["text"] = before_deaths  # 死亡者数前日比
+    main_message_template["body"]["contents"][0]["text"] = pref_name  # 都道府県名
+    main_message_template["body"]["contents"][1]["text"] = update  # 更新時間
+    main_message_template["body"]["contents"][2]["contents"][1]["contents"][1]["text"] = cases  # 感染者数
+    main_message_template["body"]["contents"][2]["contents"][1]["contents"][3]["text"] = before_cases  # 感染者数前日比
+    main_message_template["body"]["contents"][2]["contents"][2]["contents"][1]["text"] = deaths  # 死亡者数
+    main_message_template["body"]["contents"][2]["contents"][2]["contents"][3]["text"] = before_deaths  # 死亡者数前日比
     items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_top_pref()]
-    return FlexSendMessage(alt_text=output_msg, contents=flex_message_template, quick_reply=QuickReply(items=items))
+    return FlexSendMessage(alt_text=output_msg, contents=main_message_template, quick_reply=QuickReply(items=items))
+
+
+def create_text_message(output_msg, is_exist_data=True):
+    if is_exist_data:
+        items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_top_pref()]
+        return TextSendMessage(output_msg, quick_reply=QuickReply(items=items))
+    else:
+        items = [QuickReplyButton(action=MessageAction(label="ヘルプ", text="ヘルプ"))]
+        return TextSendMessage(output_msg, quick_reply=QuickReply(items=items))
+
+
+def donate_message():
+    items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_top_pref()]
+    return FlexSendMessage(alt_text="支援", contents=donate_message_template, quick_reply=QuickReply(items=items))
 
 
 @app.route("/callback", methods=["POST"])
@@ -223,7 +231,10 @@ def handle_message(event):
     input_msg = event.message.text
 
     if input_msg == "ヘルプ":
-        msg_obj = create_text_message(help_template)
+        msg_obj = create_text_message(help_message_template)
+
+    elif input_msg == "支援":
+        msg_obj = donate_message()
 
     elif input_msg == "全国":
         update = get_update() + " 更新"
@@ -246,7 +257,7 @@ def handle_message(event):
 
         bdeaths = "+" + str(deaths - before_deaths) + "人"
 
-        msg_obj = create_flex_message(
+        msg_obj = create_main_message(
             pref_name="日本国内",
             update=update,
             cases=str(cases) + "人",
@@ -276,7 +287,7 @@ def handle_message(event):
 
         output_msg = "【{}】\n感染者数: {} / 死亡者数: {}".format(input_msg, cases, deaths)
 
-        msg_obj = create_flex_message(
+        msg_obj = create_main_message(
             pref_name=input_msg,
             update=update,
             cases=str(cases) + "人",
@@ -286,13 +297,13 @@ def handle_message(event):
             output_msg=output_msg)
 
     else:
-        msg_obj = create_text_message(failure_template)
+        msg_obj = create_text_message(failure_message_template)
 
     line_bot_api.reply_message(event.reply_token, messages=msg_obj)
 
 
 if __name__ == "__main__":
-    app.run(threaded=True)
+    # app.run(threaded=True)
 
     # デバッグ
-    # app.run(host="0.0.0.0", port=7399, threaded=True, debug=True)
+    app.run(host="0.0.0.0", port=7399, threaded=True, debug=True)
