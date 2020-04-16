@@ -1,31 +1,13 @@
-import os
 import requests
 from time import sleep
 import firebase_admin
-from firebase_admin import credentials
 from firebase_admin import firestore
 from datetime import datetime, timedelta, timezone
 
 
-# firestore
-service_account_key = {
-    "type": os.environ.get("type"),
-    "project_id": os.environ.get("project_id"),
-    "private_key_id": os.environ.get("private_key_id"),
-    "private_key": os.environ.get("private_key").replace("\\n", "\n"),
-    "client_email": os.environ.get("client_email"),
-    "client_id": os.environ.get("client_id"),
-    "auth_uri": os.environ.get("auth_uri"),
-    "token_uri": os.environ.get("token_uri"),
-    "auth_provider_x509_cert_url": os.environ.get("auth_provider_x509_cert_url"),
-    "client_x509_cert_url": os.environ.get("client_x509_cert_url")
-}
-cred = credentials.Certificate(service_account_key)
-
 # [ValueError: The default Firebase app already exists.]対策
 if len(firebase_admin._apps) == 0:
-    firebase_admin.initialize_app(cred)
-
+    firebase_admin.initialize_app()
 db = firestore.client()
 
 # 都道府県の単位を合わせる用 東京 => 東京都
@@ -55,7 +37,7 @@ data_dic = {
 }
 
 
-def send_data_to_firestore(ok):
+def send_data_to_firestore(Request):
 
     # 初期化〜
     prefectures = {}
