@@ -29,7 +29,7 @@
 > LINEBotの使い方、作者、リポジトリなどの情報を出力します
 ```
 
-## Specification
+## How it works
 
 * CloudSchedulerのCronジョブで15分ごとにCloudFunctionsを発火
 * CloudFunctionsでAPIを叩きJSONデータを取得、CloudFirestoreに保存
