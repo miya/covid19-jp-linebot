@@ -5,7 +5,7 @@ from firebase_admin import firestore
 from datetime import datetime, timedelta, timezone
 
 
-# [ValueError: The default Firebase app already exists.]対策
+# ValueError: The default Firebase app already exists.対策
 if len(firebase_admin._apps) == 0:
     firebase_admin.initialize_app()
 db = firestore.client()
@@ -24,9 +24,9 @@ k = [
 ]
 
 # API
-base_url = "https://covid19-japan-web-api.now.sh/api/v1/prefectures"
+api_url = "https://covid19-japan-web-api.now.sh/api/v1/prefectures"
 
-# 公開用dictionary
+# firestore保存用dictionary
 data_dic = {
     "detail": {"update": ""},
     "prefectures": {},
@@ -48,7 +48,7 @@ def send_data_to_firestore(Request):
 
     # 5回getして200じゃなかったら諦める
     for i in range(5):
-        r = requests.get(base_url)
+        r = requests.get(api_url)
         s = r.status_code
         if s == 200:
             json_dic = r.json()
@@ -79,7 +79,8 @@ def send_data_to_firestore(Request):
         prefectures.update({
             i["name_ja"]: {
                 "cases": i["cases"],
-                "deaths": i["deaths"]
+                "deaths": i["deaths"],
+                "name_en": i["name_en"]
             }
         })
 
@@ -99,8 +100,10 @@ def send_data_to_firestore(Request):
 
     # firestoreに保存
     doc_num = str(datetime.now(jst).hour)
+    if doc_num == "22":
+        db.collection("data").document("before").set(data_dic)
     db.collection("data").document(doc_num).set(data_dic)
-    db.collection("data").document("24").set(data_dic)
+    db.collection("data").document("now").set(data_dic)
 
 
 # debug

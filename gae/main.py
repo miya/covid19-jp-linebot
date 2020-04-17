@@ -1,11 +1,10 @@
 import os
-import setting
-from datetime import datetime
 from collections import Counter
-from flask import Flask, request, abort
 import firebase_admin
-from firebase_admin import firestore
+import setting
 from firebase_admin import credentials
+from firebase_admin import firestore
+from flask import Flask, request, abort
 from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
 from linebot.models import (MessageEvent, TextMessage, TextSendMessage, FlexSendMessage, QuickReply,
@@ -41,9 +40,9 @@ failure_message_template = setting.failure_message_template
 # 都道府県名リスト
 pref_list = setting.pref_list
 
-# Firebaseのドキュメント値 [now, before]
+# Firebaseのドキュメント値
 n = "now"
-b = ""
+b = "before"
 
 
 def get_update() -> str:
@@ -225,8 +224,6 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
 
-    global b
-
     # 入力された文字列を格納
     input_msg = event.message.text
 
@@ -238,12 +235,6 @@ def handle_message(event):
 
     elif input_msg == "全国":
         update = get_update() + " 更新"
-
-        # 現在時刻+1(25時間前)
-        b = str(datetime.strptime(update, "%Y-%m-%d %H:%M 更新").hour + 1)
-        if b == "24":
-            b = "0"
-
         cases = get_total_cases()
         deaths = get_total_deaths()
         before_cases = get_before_total_cases()
@@ -268,11 +259,6 @@ def handle_message(event):
 
     elif input_msg in list(pref_list):
         update = get_update() + " 更新"
-
-        b = str(datetime.strptime(update, "%Y-%m-%d %H:%M 更新").hour + 1)
-        if b == "24":
-            b = "0"
-
         cases = get_pref_cases(input_msg)
         deaths = get_pref_deaths(input_msg)
         before_cases = get_before_pref_cases(input_msg)
@@ -306,4 +292,4 @@ if __name__ == "__main__":
     # app.run(threaded=True)
 
     # デバッグ
-    app.run(host="0.0.0.0", port=7399, threaded=True, debug=True)
+    app.run(host="0.0.0.0", port=8080, threaded=True, debug=True)
