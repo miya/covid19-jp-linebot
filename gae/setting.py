@@ -127,7 +127,7 @@ main_message_template = {
 
 
 # 支援メッセージテンプレート
-donate_message_template ={
+donate_message_template = {
     "type": "bubble",
     "header": {
       "type": "box",
@@ -211,7 +211,7 @@ donate_message_template ={
 
 # ヘルプメッセージテンプレート
 help_message_template = textwrap.dedent("""
-    コロナウイルスによる日本国内の感染者数、死亡者数を調べることができます。
+    コロナウイルスによる日本国内の感染者数・死亡者数を調べることができます。前日比はの22時を基点としています。
 
     🦠 全国
     > 日本国内の感染者・死亡者総数
@@ -219,6 +219,8 @@ help_message_template = textwrap.dedent("""
     🦠 都道府県名
     > 各都道府県の感染者数と死亡者数
       🙆‍♂️ 東京都  🙅‍♂️ 東京
+      
+    ⚠️ LINEBotが使用しているデータは有志が収集しているものです。より正確な情報は厚生労働省などの公的機関が発表しているものをご確認ください。
 
     データ元: https://bit.ly/2RfpBGN
     ソースコード: https://bit.ly/2UNM8fZ
