@@ -102,7 +102,6 @@ def send_data_to_firestore(Request):
     doc_num = str(datetime.now(jst).hour)
     if doc_num == "22":
         db.collection("data").document("before").set(data_dic)
-    db.collection("data").document(doc_num).set(data_dic)
     db.collection("data").document("now").set(data_dic)
 
 
