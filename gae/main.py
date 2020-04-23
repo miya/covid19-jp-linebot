@@ -185,12 +185,12 @@ def create_main_message(pref_name, update, cases, before_cases, deaths, before_d
     -------
     FlexMessageObject
     """
-    main_message_template["body"]["contents"][0]["text"] = pref_name  # 都道府県名
-    main_message_template["body"]["contents"][1]["text"] = update  # 更新時間
-    main_message_template["body"]["contents"][2]["contents"][1]["contents"][1]["text"] = cases  # 感染者数
-    main_message_template["body"]["contents"][2]["contents"][1]["contents"][3]["text"] = before_cases  # 感染者数前日比
-    main_message_template["body"]["contents"][2]["contents"][2]["contents"][1]["text"] = deaths  # 死亡者数
-    main_message_template["body"]["contents"][2]["contents"][2]["contents"][3]["text"] = before_deaths  # 死亡者数前日比
+    main_message_template["body"]["contents"][0]["text"] = pref_name
+    main_message_template["body"]["contents"][1]["text"] = update
+    main_message_template["body"]["contents"][2]["contents"][1]["contents"][1]["text"] = cases
+    main_message_template["body"]["contents"][2]["contents"][1]["contents"][3]["text"] = before_cases
+    main_message_template["body"]["contents"][2]["contents"][2]["contents"][1]["text"] = deaths
+    main_message_template["body"]["contents"][2]["contents"][2]["contents"][3]["text"] = before_deaths
     items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_top_pref()]
     return FlexSendMessage(alt_text=output_msg, contents=main_message_template, quick_reply=QuickReply(items=items))
 
