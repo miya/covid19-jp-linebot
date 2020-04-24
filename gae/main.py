@@ -45,7 +45,7 @@ n = "now"
 b = "before"
 
 
-def get_update() -> str:
+def get_update():
     """
     Returns
     -------
@@ -54,7 +54,7 @@ def get_update() -> str:
     return col_ref.document(n).get().to_dict()["detail"]["update"]
 
 
-def get_total_cases() -> int:
+def get_total_cases():
     """
     Returns
     -------
@@ -63,7 +63,7 @@ def get_total_cases() -> int:
     return col_ref.document(n).get().to_dict()["total"]["total_cases"]
 
 
-def get_before_total_cases() -> int:
+def get_before_total_cases():
     """
     Returns
     -------
@@ -72,7 +72,7 @@ def get_before_total_cases() -> int:
     return col_ref.document(b).get().to_dict()["total"]["total_cases"]
 
 
-def get_total_deaths() -> int:
+def get_total_deaths():
     """
     Returns
     -------
@@ -81,7 +81,7 @@ def get_total_deaths() -> int:
     return col_ref.document(n).get().to_dict()["total"]["total_deaths"]
 
 
-def get_before_total_deaths() -> int:
+def get_before_total_deaths():
     """
     Returns
     -------
@@ -90,7 +90,7 @@ def get_before_total_deaths() -> int:
     return col_ref.document(b).get().to_dict()["total"]["total_deaths"]
 
 
-def get_pref_cases(pref_name) -> int:
+def get_pref_cases(pref_name):
     """
     Parameters
     ----------
@@ -104,7 +104,7 @@ def get_pref_cases(pref_name) -> int:
     return col_ref.document(n).get().to_dict()["prefectures"][pref_name]["cases"]
 
 
-def get_before_pref_cases(pref_name) -> int:
+def get_before_pref_cases(pref_name):
     """
     Parameters
     ----------
@@ -118,7 +118,7 @@ def get_before_pref_cases(pref_name) -> int:
     return col_ref.document(b).get().to_dict()["prefectures"][pref_name]["cases"]
 
 
-def get_pref_deaths(pref_name) -> int:
+def get_pref_deaths(pref_name):
     """
     Parameters
     ----------
@@ -132,7 +132,7 @@ def get_pref_deaths(pref_name) -> int:
     return col_ref.document(n).get().to_dict()["prefectures"][pref_name]["deaths"]
 
 
-def get_before_pref_deaths(pref_name) -> int:
+def get_before_pref_deaths(pref_name):
     """
     Parameters
     ----------
@@ -146,7 +146,7 @@ def get_before_pref_deaths(pref_name) -> int:
     return col_ref.document(b).get().to_dict()["prefectures"][pref_name]["deaths"]
 
 
-def get_top_pref() -> list:
+def get_top_pref():
     """
     Returns
     -------
