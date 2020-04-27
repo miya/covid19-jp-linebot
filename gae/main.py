@@ -160,53 +160,51 @@ def get_top_pref():
     return sorted_list
 
 
-def create_main_message(pref_name, update, cases, cases_ratio, deaths, deaths_ratio, output_msg):
-    """
-    FlexMessage、QuickReplyの生成
+def create_main_message(pref_name):
+    update = get_update() + " 更新"
 
-    Parameters
-    ----------
-    pref_name: str
-        都道府県名
-    update: str
-        アップデート時間
-    cases: str
-        現在の感染者数
-    cases_ratio: str
-        前日の感染者数
-    deaths: str
-        現在の死亡者数
-    deaths_ratio: str
-        前日の死亡者数
-    output_msg: str
-        メッセージ本文
-
-    Returns
-    -------
-    FlexMessageObject
-    """
-    main_message_template["body"]["contents"][0]["text"] = pref_name
-    main_message_template["body"]["contents"][1]["text"] = update
-    main_message_template["body"]["contents"][2]["contents"][1]["contents"][1]["text"] = cases
-    main_message_template["body"]["contents"][2]["contents"][1]["contents"][3]["text"] = cases_ratio
-    main_message_template["body"]["contents"][2]["contents"][2]["contents"][1]["text"] = deaths
-    main_message_template["body"]["contents"][2]["contents"][2]["contents"][3]["text"] = deaths_ratio
-    items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_top_pref()]
-    return FlexSendMessage(alt_text=output_msg, contents=main_message_template, quick_reply=QuickReply(items=items))
-
-
-def create_text_message(output_msg, is_exist_data=True):
-    if is_exist_data:
-        items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_top_pref()]
-        return TextSendMessage(output_msg, quick_reply=QuickReply(items=items))
+    if pref_name == "全国":
+        cases = get_total_cases()
+        deaths = get_total_deaths()
+        before_cases = get_before_total_cases()
+        before_deaths = get_before_total_deaths()
+        output_msg = "【日本全国】\n感染者数: {} / 死亡者数: {}".format(cases, deaths)
     else:
-        items = [QuickReplyButton(action=MessageAction(label="ヘルプ", text="ヘルプ"))]
-        return TextSendMessage(output_msg, quick_reply=QuickReply(items=items))
+        cases = get_pref_cases(pref_name)
+        deaths = get_pref_deaths(pref_name)
+        before_cases = get_before_pref_cases(pref_name)
+        before_deaths = get_before_pref_deaths(pref_name)
+        output_msg = "【{}】\n感染者数: {} / 死亡者数: {}".format(pref_name, cases, deaths)
 
+    if cases >= before_cases:
+        cases_ratio = "+" + str(cases - before_cases) + "人"
+    else:
+        cases_ratio = "-" + str(before_cases - cases) + "人"
 
-def donate_message():
+    deaths_ratio = "+" + str(deaths - before_deaths) + "人"
+
+    data_dic = {
+        "update": update,
+        "pref_name": pref_name,
+        "cases": str(cases) + "人",
+        "cases_ratio": cases_ratio,
+        "deaths": str(deaths) + "人",
+        "deaths_ratio": deaths_ratio
+    }
+
+    flex_message = setting.main_message_template(data_dic)
     items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_top_pref()]
-    return FlexSendMessage(alt_text="支援", contents=donate_message_template, quick_reply=QuickReply(items=items))
+    return FlexSendMessage(alt_text=output_msg, contents=flex_message, quick_reply=QuickReply(items=items))
+
+
+def create_others_message(output_msg):
+    items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_top_pref()]
+    if output_msg == "支援":
+        return FlexSendMessage(alt_text="支援", contents=donate_message_template, quick_reply=QuickReply(items=items))
+    elif output_msg == "ヘルプ":
+        return TextSendMessage(help_message_template, quick_reply=QuickReply(items=items))
+    else:
+        return TextSendMessage(failure_message_template, quick_reply=QuickReply(items=items))
 
 
 @app.route("/callback", methods=["POST"])
@@ -224,66 +222,22 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
 
-    # 入力された文字列を格納
     input_msg = event.message.text
 
     if input_msg == "ヘルプ":
-        msg_obj = create_text_message(help_message_template)
+        msg_obj = create_others_message(input_msg)
 
     elif input_msg == "支援":
-        msg_obj = donate_message()
+        msg_obj = create_others_message(input_msg)
 
     elif input_msg == "全国":
-        update = get_update() + " 更新"
-        cases = get_total_cases()
-        deaths = get_total_deaths()
-        before_cases = get_before_total_cases()
-        before_deaths = get_before_total_deaths()
-        output_msg = "【日本国内】\n感染者数: {} / 死亡者数: {}".format(cases, deaths)
-
-        if cases >= before_cases:
-            cases_ratio = "+" + str(cases - before_cases) + "人"
-        else:
-            cases_ratio = "-" + str(before_cases - cases) + "人"
-
-        deaths_ratio = "+" + str(deaths - before_deaths) + "人"
-
-        msg_obj = create_main_message(
-            pref_name="日本国内",
-            update=update,
-            cases=str(cases) + "人",
-            cases_ratio=cases_ratio,
-            deaths=str(deaths) + "人",
-            deaths_ratio=deaths_ratio,
-            output_msg=output_msg)
+        msg_obj = create_main_message(input_msg)
 
     elif input_msg in list(pref_list):
-        update = get_update() + " 更新"
-        cases = get_pref_cases(input_msg)
-        deaths = get_pref_deaths(input_msg)
-        before_cases = get_before_pref_cases(input_msg)
-        before_deaths = get_before_pref_deaths(input_msg)
-
-        if cases >= before_cases:
-            cases_ratio = "+" + str(cases - before_cases) + "人"
-        else:
-            cases_ratio = "-" + str(before_cases - cases) + "人"
-
-        deaths_ratio = "+" + str(deaths - before_deaths) + "人"
-
-        output_msg = "【{}】\n感染者数: {} / 死亡者数: {}".format(input_msg, cases, deaths)
-
-        msg_obj = create_main_message(
-            pref_name=input_msg,
-            update=update,
-            cases=str(cases) + "人",
-            cases_ratio=cases_ratio,
-            deaths=str(deaths) + "人",
-            deaths_ratio=deaths_ratio,
-            output_msg=output_msg)
+        msg_obj = create_main_message(input_msg)
 
     else:
-        msg_obj = create_text_message(failure_message_template)
+        msg_obj = create_others_message(input_msg)
 
     line_bot_api.reply_message(event.reply_token, messages=msg_obj)
 
