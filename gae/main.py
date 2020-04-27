@@ -160,7 +160,7 @@ def get_top_pref():
     return sorted_list
 
 
-def create_main_message(pref_name, update, cases, before_cases, deaths, before_deaths, output_msg):
+def create_main_message(pref_name, update, cases, cases_ratio, deaths, deaths_ratio, output_msg):
     """
     FlexMessage、QuickReplyの生成
 
@@ -172,11 +172,11 @@ def create_main_message(pref_name, update, cases, before_cases, deaths, before_d
         アップデート時間
     cases: str
         現在の感染者数
-    before_cases: str
+    cases_ratio: str
         前日の感染者数
     deaths: str
         現在の死亡者数
-    before_deaths: str
+    deaths_ratio: str
         前日の死亡者数
     output_msg: str
         メッセージ本文
@@ -188,9 +188,9 @@ def create_main_message(pref_name, update, cases, before_cases, deaths, before_d
     main_message_template["body"]["contents"][0]["text"] = pref_name
     main_message_template["body"]["contents"][1]["text"] = update
     main_message_template["body"]["contents"][2]["contents"][1]["contents"][1]["text"] = cases
-    main_message_template["body"]["contents"][2]["contents"][1]["contents"][3]["text"] = before_cases
+    main_message_template["body"]["contents"][2]["contents"][1]["contents"][3]["text"] = cases_ratio
     main_message_template["body"]["contents"][2]["contents"][2]["contents"][1]["text"] = deaths
-    main_message_template["body"]["contents"][2]["contents"][2]["contents"][3]["text"] = before_deaths
+    main_message_template["body"]["contents"][2]["contents"][2]["contents"][3]["text"] = deaths_ratio
     items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in get_top_pref()]
     return FlexSendMessage(alt_text=output_msg, contents=main_message_template, quick_reply=QuickReply(items=items))
 
@@ -242,19 +242,19 @@ def handle_message(event):
         output_msg = "【日本国内】\n感染者数: {} / 死亡者数: {}".format(cases, deaths)
 
         if cases >= before_cases:
-            bcases = "+" + str(cases - before_cases) + "人"
+            cases_ratio = "+" + str(cases - before_cases) + "人"
         else:
-            bcases = "-" + str(before_cases - cases) + "人"
+            cases_ratio = "-" + str(before_cases - cases) + "人"
 
-        bdeaths = "+" + str(deaths - before_deaths) + "人"
+        deaths_ratio = "+" + str(deaths - before_deaths) + "人"
 
         msg_obj = create_main_message(
             pref_name="日本国内",
             update=update,
             cases=str(cases) + "人",
-            before_cases=bcases,
+            cases_ratio=cases_ratio,
             deaths=str(deaths) + "人",
-            before_deaths=bdeaths,
+            deaths_ratio=deaths_ratio,
             output_msg=output_msg)
 
     elif input_msg in list(pref_list):
@@ -265,11 +265,11 @@ def handle_message(event):
         before_deaths = get_before_pref_deaths(input_msg)
 
         if cases >= before_cases:
-            bcases = "+" + str(cases - before_cases) + "人"
+            cases_ratio = "+" + str(cases - before_cases) + "人"
         else:
-            bcases = "-" + str(before_cases - cases) + "人"
+            cases_ratio = "-" + str(before_cases - cases) + "人"
 
-        bdeaths = "+" + str(deaths - before_deaths) + "人"
+        deaths_ratio = "+" + str(deaths - before_deaths) + "人"
 
         output_msg = "【{}】\n感染者数: {} / 死亡者数: {}".format(input_msg, cases, deaths)
 
@@ -277,9 +277,9 @@ def handle_message(event):
             pref_name=input_msg,
             update=update,
             cases=str(cases) + "人",
-            before_cases=bcases,
+            cases_ratio=cases_ratio,
             deaths=str(deaths) + "人",
-            before_deaths=bdeaths,
+            deaths_ratio=deaths_ratio,
             output_msg=output_msg)
 
     else:
@@ -289,7 +289,7 @@ def handle_message(event):
 
 
 if __name__ == "__main__":
-    # app.run(threaded=True)
+    app.run(threaded=True)
 
     # デバッグ
-    app.run(host="0.0.0.0", port=8080, threaded=True, debug=True)
+    # app.run(host="0.0.0.0", port=8080, threaded=True, debug=True)
