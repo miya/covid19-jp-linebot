@@ -1,129 +1,140 @@
 import textwrap
 
+
 # メインメッセージテンプレート
-main_message_template = {
-    "type": "bubble",
-    "body": {
-        "type": "box",
-        "layout": "vertical",
-        "contents": [
-            {
-                "type": "text",
-                "text": "",
-                "size": "xxl",
-                "align": "center",
-                "weight": "bold",
-                "color": "#5DB460"
-            },
-            {
-                "type": "text",
-                "text": "",
-                "size": "xs",
-                "align": "center",
-                "weight": "regular",
-                "color": "#A39E9E"
-            },
-            {
-                "type": "box",
-                "layout": "vertical",
-                "spacing": "sm",
-                "margin": "lg",
-                "contents": [
-                    {
-                        "type": "separator"
-                    },
-                    {
-                        "type": "box",
-                        "layout": "baseline",
-                        "spacing": "sm",
-                        "contents": [
-                            {
-                                "type": "text",
-                                "text": "感染者数",
-                                "flex": 0,
-                                "size": "sm",
-                                "align": "center",
-                                "weight": "bold",
-                                "color": "#000000"
-                            },
-                            {
-                                "type": "text",
-                                "text": "",
-                                "flex": 1,
-                                "size": "sm",
-                                "align": "center",
-                                "weight": "bold",
-                                "color": "#CA2C2C",
-                                "wrap": True
-                            },
-                            {
-                                "type": "text",
-                                "text": "前日比",
-                                "flex": 0,
-                                "size": "sm",
-                                "align": "center",
-                                "weight": "bold",
-                                "color": "#000000"
-                            },
-                            {
-                                "type": "text",
-                                "text": "",
-                                "flex": 1,
-                                "size": "sm",
-                                "align": "center",
-                                "weight": "bold",
-                                "color": "#CA2C2C"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "box",
-                        "layout": "baseline",
-                        "spacing": "sm",
-                        "contents": [
-                            {
-                                "type": "text",
-                                "text": "死亡者数",
-                                "flex": 0,
-                                "size": "sm",
-                                "align": "center",
-                                "weight": "bold",
-                                "color": "#000000"
-                            },
-                            {
-                                "type": "text",
-                                "text": "",
-                                "flex": 1,
-                                "size": "sm",
-                                "align": "center",
-                                "weight": "bold",
-                                "color": "#CA2C2C",
-                                "wrap": True
-                            },
-                            {
-                                "type": "text",
-                                "text": "前日比",
-                                "flex": 0,
-                                "size": "sm",
-                                "align": "center",
-                                "weight": "bold",
-                                "color": "#000000"
-                            },
-                            {
-                                "type": "text",
-                                "text": "",
-                                "size": "sm",
-                                "align": "center",
-                                "weight": "bold",
-                                "color": "#CA2C2C"
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
+def main_message_template(data_dic):
+
+    update = data_dic["update"]
+    pref_name = data_dic["pref_name"]
+    cases = data_dic["cases"]
+    cases_ratio = data_dic["cases_ratio"]
+    deaths = data_dic["deaths"]
+    deaths_ratio = data_dic["deaths_ratio"]
+
+    template = {
+        "type": "bubble",
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+                {
+                    "type": "text",
+                    "text": pref_name,
+                    "size": "xxl",
+                    "align": "center",
+                    "weight": "bold",
+                    "color": "#5DB460"
+                },
+                {
+                    "type": "text",
+                    "text": update,
+                    "size": "xs",
+                    "align": "center",
+                    "weight": "regular",
+                    "color": "#A39E9E"
+                },
+                {
+                    "type": "box",
+                    "layout": "vertical",
+                    "spacing": "sm",
+                    "margin": "lg",
+                    "contents": [
+                        {
+                            "type": "separator"
+                        },
+                        {
+                            "type": "box",
+                            "layout": "baseline",
+                            "spacing": "sm",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": "感染者数",
+                                    "flex": 0,
+                                    "size": "sm",
+                                    "align": "center",
+                                    "weight": "bold",
+                                    "color": "#000000"
+                                },
+                                {
+                                    "type": "text",
+                                    "text": cases,
+                                    "flex": 1,
+                                    "size": "sm",
+                                    "align": "center",
+                                    "weight": "bold",
+                                    "color": "#CA2C2C",
+                                    "wrap": True
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "前日比",
+                                    "flex": 0,
+                                    "size": "sm",
+                                    "align": "center",
+                                    "weight": "bold",
+                                    "color": "#000000"
+                                },
+                                {
+                                    "type": "text",
+                                    "text": cases_ratio,
+                                    "flex": 1,
+                                    "size": "sm",
+                                    "align": "center",
+                                    "weight": "bold",
+                                    "color": "#CA2C2C"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "box",
+                            "layout": "baseline",
+                            "spacing": "sm",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": "死亡者数",
+                                    "flex": 0,
+                                    "size": "sm",
+                                    "align": "center",
+                                    "weight": "bold",
+                                    "color": "#000000"
+                                },
+                                {
+                                    "type": "text",
+                                    "text": deaths,
+                                    "flex": 1,
+                                    "size": "sm",
+                                    "align": "center",
+                                    "weight": "bold",
+                                    "color": "#CA2C2C",
+                                    "wrap": True
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "前日比",
+                                    "flex": 0,
+                                    "size": "sm",
+                                    "align": "center",
+                                    "weight": "bold",
+                                    "color": "#000000"
+                                },
+                                {
+                                    "type": "text",
+                                    "text": deaths_ratio,
+                                    "size": "sm",
+                                    "align": "center",
+                                    "weight": "bold",
+                                    "color": "#CA2C2C"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
     }
-}
+    return template
 
 
 # 支援メッセージテンプレート
