@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 # ValueError: The default Firebase app already exists.対策
 if len(firebase_admin._apps) == 0:
     firebase_admin.initialize_app()
+
 db = firestore.client()
 
 # 都道府県の単位を合わせる用 東京 => 東京都
@@ -44,6 +45,7 @@ def send_data_to_firestore(Request):
     json_dic = {}
     total_cases = 0
     total_deaths = 0
+    total_pcr = 0
     cnt = 0
 
     # 5回getして200じゃなかったら諦める
@@ -72,14 +74,19 @@ def send_data_to_firestore(Request):
             i["name_ja"] = name_ja + "県"
 
         # 各都道府県の感染者数・死亡者数を加算
-        total_cases += i["cases"]
-        total_deaths += i["deaths"]
+        cases = i["cases"]
+        deaths = i["deaths"]
+        pcr = i["pcr"]
+        total_cases += cases
+        total_deaths += deaths
+        total_pcr += pcr
 
         # 都道府県名、感染者数、死亡者数を格納
         prefectures.update({
             i["name_ja"]: {
-                "cases": i["cases"],
-                "deaths": i["deaths"],
+                "cases": cases,
+                "deaths": deaths,
+                "pcr": pcr,
                 "name_en": i["name_en"]
             }
         })
@@ -94,7 +101,8 @@ def send_data_to_firestore(Request):
         "prefectures": prefectures,
         "total": {
             "total_cases": total_cases,
-            "total_deaths": total_deaths
+            "total_deaths": total_deaths,
+            "total_pcr": total_pcr
         }
     })
 
