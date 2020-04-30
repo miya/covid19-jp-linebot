@@ -31,11 +31,13 @@
 
 ## How it works
 
-* CloudSchedulerのCronジョブで15分ごとにCloudFunctionsを発火
-* CloudFunctionsでAPIを叩きJSONデータを取得、CloudFirestoreに保存
-* LINEBotにメッセージが送信された時にCloudFirestoreからデータを取得して返信
+![](https://user-images.githubusercontent.com/34241526/80704962-83857f80-8b20-11ea-9aa3-245b6818011e.png)
 
-![](https://user-images.githubusercontent.com/34241526/79368113-db9d7d00-7f89-11ea-89f9-a3803bf48c83.png)
+1. Cloud Schedulerを使い15分間隔でCloud Functionsに対してhttpリクエストを行う
+2. Cloud FunctionsでAPIを叩く
+3. 取得したデータをCloud Firestoreに保存
+4. クライアント(ユーザー)がLINEbotに対してメッセージを送信
+5. App EngineにホスティングしてあるLINEbotがCloud Firestoreからデータを取り出し返信
 
 ## Licence
 
