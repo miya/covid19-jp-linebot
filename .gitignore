@@ -3,5 +3,5 @@
 
 test.py
 
-/gae/serviceAccountKey.json
-gae/secret.yaml
+/linebot/serviceAccountKey.json
+linebot/secret.yaml
