@@ -3,11 +3,7 @@ import firebase_admin
 from firebase_admin import firestore
 
 
-from firebase_admin import credentials
-cred = credentials.Certificate("/Users/salanderlisbeth/code/py/covid19-jp-linebot/linebot/serviceAccountKey.json")
-firebase_admin.initialize_app(cred)
-
-# firebase_admin.initialize_app()
+firebase_admin.initialize_app()
 db = firestore.client()
 col_ref = db.collection("data")
 
