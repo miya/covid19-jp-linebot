@@ -6,8 +6,6 @@ def main_message_template(data_dic):
     cases_ratio = data_dic["cases_ratio"]
     deaths = data_dic["deaths"]
     deaths_ratio = data_dic["deaths_ratio"]
-    pcr = data_dic["pcr"]
-    pcr_ratio = data_dic["pcr_ratio"]
 
     template = {
         "type": "bubble",
@@ -125,48 +123,6 @@ def main_message_template(data_dic):
                         }
                     ]
                 },
-                {
-                    "type": "box",
-                    "layout": "horizontal",
-                    "contents": [
-                        {
-                            "type": "text",
-                            "text": "PCR",
-                            "size": "sm",
-                            "align": "center",
-                            "gravity": "center",
-                            "weight": "bold",
-                            "color": "#000000"
-                        },
-                        {
-                            "type": "text",
-                            "text": pcr,
-                            "size": "sm",
-                            "align": "center",
-                            "gravity": "center",
-                            "weight": "bold",
-                            "color": "#C82525"
-                        },
-                        {
-                            "type": "text",
-                            "text": "前日比",
-                            "size": "sm",
-                            "align": "center",
-                            "gravity": "center",
-                            "weight": "bold",
-                            "color": "#000000"
-                        },
-                        {
-                            "type": "text",
-                            "text": pcr_ratio,
-                            "size": "sm",
-                            "align": "center",
-                            "gravity": "center",
-                            "weight": "bold",
-                            "color": "#C82525"
-                        }
-                    ]
-                }
             ]
         }
     }
