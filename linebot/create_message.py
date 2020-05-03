@@ -52,11 +52,17 @@ def main_message(pref_name):
     return FlexSendMessage(alt_text=output_msg, contents=flex_message, quick_reply=QuickReply(items=items))
 
 
-def others_message(output_msg):
+def others_message(input_msg):
     items = [QuickReplyButton(action=MessageAction(text=item, label=item)) for item in firestore.get_top_pref()]
-    if output_msg == "支援":
-        return FlexSendMessage(alt_text="支援", contents=template.donate_message_template, quick_reply=QuickReply(items=items))
-    elif output_msg == "ヘルプ":
-        return FlexSendMessage(alt_text="ヘルプ", contents=template.help_message_template, quick_reply=QuickReply(items=items))
+
+    if input_msg == "支援":
+        output_msg = "支援"
+        content = template.donate_message_template
+    elif input_msg == "ヘルプ":
+        output_msg = "ヘルプ"
+        content = template.help_message_template
     else:
-        return FlexSendMessage(alt_text="入力された値が間違っています。", contents=template.failure_message_template, quick_reply=QuickReply(items=items))
+        output_msg = "入力された値が間違っています。"
+        content = template.failure_message_template
+
+    return FlexSendMessage(alt_text=output_msg, contents=content, quick_reply=QuickReply(items=items))
