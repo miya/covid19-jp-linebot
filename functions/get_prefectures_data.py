@@ -40,7 +40,7 @@ data_dic = {
 
 def send_data_to_firestore(Request):
 
-    # 初期化〜
+    # 初期化
     prefectures = {}
     json_dic = {}
     total_cases = 0
@@ -48,7 +48,7 @@ def send_data_to_firestore(Request):
     total_pcr = 0
     cnt = 0
 
-    # 5回getして200じゃなかったら諦める
+    # 5回リクエストしてステータスが200じゃなかったら例外を出す
     for i in range(5):
         r = requests.get(api_url)
         s = r.status_code
@@ -58,9 +58,8 @@ def send_data_to_firestore(Request):
         else:
             cnt += 1
             sleep(10)
-        if cnt >= 4:
-            print("データを取得できませんでした。")
-            exit()
+        if cnt >= 5:
+            raise Exception("APIからデータを取得することができませんでした。")
 
     for i in json_dic:
 
