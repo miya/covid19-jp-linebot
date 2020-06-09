@@ -192,7 +192,7 @@ donate_message_template = {
           "contents": [
             {
               "type": "image",
-              "url": "https://user-images.githubusercontent.com/34241526/79419984-e6402c80-7ff2-11ea-9c34-bab74414de7d.jpg",
+              "url": "https://user-images.githubusercontent.com/34241526/84120394-bd776900-aa70-11ea-9341-8f59731e000d.jpg",
               "size": "xl"
             },
             {
@@ -200,7 +200,7 @@ donate_message_template = {
               "action": {
                 "type": "uri",
                 "label": "Kyash",
-                "uri": "https://user-images.githubusercontent.com/34241526/79419984-e6402c80-7ff2-11ea-9c34-bab74414de7d.jpg"
+                "uri": "https://user-images.githubusercontent.com/34241526/84120394-bd776900-aa70-11ea-9341-8f59731e000d.jpg"
               },
               "color": "#0890EE",
               "margin": "md",
