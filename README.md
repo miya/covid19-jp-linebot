@@ -34,10 +34,10 @@
 ![](https://user-images.githubusercontent.com/34241526/80704962-83857f80-8b20-11ea-9aa3-245b6818011e.png)
 
 1. Cloud Schedulerを使い15分間隔でCloud Functionsに対してhttpリクエストを行う
-2. Cloud FunctionsでAPIを叩く
+2. Cloud FunctionsでAPIからデータを取得
 3. 取得したデータをCloud Firestoreに保存
 4. クライアント(ユーザー)がLINEbotに対してメッセージを送信
-5. App EngineにホスティングしてあるLINEbotがCloud Firestoreからデータを取り出し返信
+5. App Engine上のLINEbotがCloud Firestoreからデータを取り出し返信
 
 ## Licence
 
